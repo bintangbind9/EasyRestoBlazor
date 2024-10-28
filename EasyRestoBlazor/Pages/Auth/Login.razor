@@ -1,0 +1,82 @@
+﻿@page "/login"
+@layout AuthLayout
+
+@inject IAuthRepository AuthRepository
+@inject NavigationManager Navigation
+@inject ISessionStorageService SessionStorageService
+@inject ISnackbar Snackbar
+
+<PageTitle>Login</PageTitle>
+
+<EditForm Model="@AuthLoginRequest" OnValidSubmit="LoginMethod">
+    <DataAnnotationsValidator />
+    <MudCard>
+        <MudCardHeader>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h6">Login</MudText>
+            </CardHeaderContent>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudTextField Label="Username"
+                          @bind-Value="AuthLoginRequest.Username" For="@(() => AuthLoginRequest.Username)" />
+            <MudTextField Label="Password" Class="mt-3"
+                          @bind-Value="AuthLoginRequest.Password" For="@(() => AuthLoginRequest.Password)" InputType="InputType.Password" />
+        </MudCardContent>
+        <MudCardActions>
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Login</MudButton>
+        </MudCardActions>
+    </MudCard>
+</EditForm>
+
+<LoadingOverlay IsLoading="_isLoading"></LoadingOverlay>
+
+@code {
+    private bool _isLoading;
+
+    AuthLoginRequest AuthLoginRequest = new AuthLoginRequest();
+
+    private string? returnUrl;
+
+    protected override void OnInitialized()
+    {
+        var uri = new Uri(Navigation.Uri);
+        var queries = QueryHelpers.ParseQuery(uri.Query);
+        if (queries.ContainsKey("returnUrl"))
+        {
+            returnUrl = queries["returnUrl"];
+        }
+    }
+
+    private async Task LoginMethod()
+    {
+        try
+        {
+            _isLoading = true;
+
+            var response = await AuthRepository.Login(AuthLoginRequest);
+            if (response is null)
+            {
+                throw new Exception("Cannot login! Something went wrong.");
+            }
+
+            await SessionStorageService.SetItemAsync<AuthResponse>(SessionCode.EasyRestoAuth.ToString(), response.Data);
+
+            if (!string.IsNullOrEmpty(returnUrl))
+            {
+                Navigation.NavigateTo(returnUrl, replace: true);
+            }
+            else
+            {
+                Navigation.NavigateTo(Routes.Dashboard, replace: true);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+}

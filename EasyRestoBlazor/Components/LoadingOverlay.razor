@@ -1,0 +1,8 @@
+﻿<MudOverlay @bind-Visible="IsLoading" DarkBackground="true">
+    <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+</MudOverlay>
+
+@code {
+    [Parameter]
+    public bool IsLoading { get; set; }
+}

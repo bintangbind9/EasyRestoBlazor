@@ -1,0 +1,22 @@
+﻿<Router AppAssembly="@typeof(App).Assembly">
+    <Found Context="routeData">
+        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+    </Found>
+    <NotFound>
+        <PageTitle>Not found</PageTitle>
+        <LayoutView Layout="@typeof(AuthLayout)">
+            <MudCard>
+                <MudCardContent>
+                    <MudText Typo="Typo.h2" Align="Align.Center">404 - Not Found</MudText>
+                    <MudText Typo="Typo.body1" Align="Align.Center">
+                        Sorry, the page you are looking for does not exist.
+                    </MudText>
+                    <MudButton Color="Color.Primary" Href="/" Variant="Variant.Outlined" FullWidth="true" Class="mt-4">
+                        Go to Home
+                    </MudButton>
+                </MudCardContent>
+            </MudCard>
+        </LayoutView>
+    </NotFound>
+</Router>

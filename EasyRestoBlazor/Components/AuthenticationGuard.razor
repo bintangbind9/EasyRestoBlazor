@@ -1,0 +1,25 @@
+﻿@inject IAuthRepository AuthRepository
+@inject NavigationManager NavigationManager
+
+@inherits LayoutComponentBase
+
+@code {
+    protected override async void OnInitialized()
+    {
+        var user = await AuthRepository.GetUser();
+        string uri = $"/{NavigationManager.Uri.Replace(NavigationManager.BaseUri, "")}".Split('?')[0];
+
+        if (user is null && !(uri == Routes.Login || uri == Routes.Register))
+        {
+            var returnUrl = NavigationManager.ToAbsoluteUri(NavigationManager.Uri).PathAndQuery;
+            NavigationManager.NavigateTo($"{Routes.Login}?returnUrl={Uri.EscapeDataString(returnUrl)}", replace: true);
+            return;
+        }
+
+        if (user is not null && (uri == Routes.Login || uri == Routes.Register))
+        {
+            NavigationManager.NavigateTo(Routes.Dashboard, replace: true);
+            return;
+        }
+    }
+}

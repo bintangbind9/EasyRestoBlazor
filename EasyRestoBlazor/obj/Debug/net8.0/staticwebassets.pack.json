@@ -1,0 +1,57 @@
+{
+  "Files": [
+    {
+      "Id": "D:\\Users\\bsi90887\\Documents\\projects\\pesan_makanan\\EasyRestoBlazor\\EasyRestoBlazor\\bin\\Debug\\net8.0\\wwwroot\\_framework\\blazor.webassembly.js",
+      "PackagePath": "staticwebassets\\_framework\\blazor.webassembly.js"
+    },
+    {
+      "Id": "D:\\Users\\bsi90887\\Documents\\projects\\pesan_makanan\\EasyRestoBlazor\\EasyRestoBlazor\\obj\\Debug\\net8.0\\compressed\\v38zdp1msl.gz",
+      "PackagePath": "staticwebassets\\_framework\\blazor.webassembly.js.gz"
+    },
+    {
+      "Id": "D:\\Users\\bsi90887\\Documents\\projects\\pesan_makanan\\EasyRestoBlazor\\EasyRestoBlazor\\wwwroot\\appsettings.Development.json",
+      "PackagePath": "staticwebassets\\appsettings.Development.json"
+    },
+    {
+      "Id": "D:\\Users\\bsi90887\\Documents\\projects\\pesan_makanan\\EasyRestoBlazor\\EasyRestoBlazor\\wwwroot\\appsettings.Production.json",
+      "PackagePath": "staticwebassets\\appsettings.Production.json"
+    },
+    {
+      "Id": "D:\\Users\\bsi90887\\Documents\\projects\\pesan_makanan\\EasyRestoBlazor\\EasyRestoBlazor\\wwwroot\\appsettings.json",
+      "PackagePath": "staticwebassets\\appsettings.json"
+    },
+    {
+      "Id": "D:\\Users\\bsi90887\\Documents\\projects\\pesan_makanan\\EasyRestoBlazor\\EasyRestoBlazor\\wwwroot\\css\\app.css",
+      "PackagePath": "staticwebassets\\css\\app.css"
+    },
+    {
+      "Id": "D:\\Users\\bsi90887\\Documents\\projects\\pesan_makanan\\EasyRestoBlazor\\EasyRestoBlazor\\wwwroot\\favicon.png",
+      "PackagePath": "staticwebassets\\favicon.png"
+    },
+    {
+      "Id": "D:\\Users\\bsi90887\\Documents\\projects\\pesan_makanan\\EasyRestoBlazor\\EasyRestoBlazor\\wwwroot\\icon-192.png",
+      "PackagePath": "staticwebassets\\icon-192.png"
+    },
+    {
+      "Id": "D:\\Users\\bsi90887\\Documents\\projects\\pesan_makanan\\EasyRestoBlazor\\EasyRestoBlazor\\wwwroot\\index.html",
+      "PackagePath": "staticwebassets\\index.html"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.EasyRestoBlazor.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.build.EasyRestoBlazor.props",
+      "PackagePath": "build\\EasyRestoBlazor.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildMultiTargeting.EasyRestoBlazor.props",
+      "PackagePath": "buildMultiTargeting\\EasyRestoBlazor.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildTransitive.EasyRestoBlazor.props",
+      "PackagePath": "buildTransitive\\EasyRestoBlazor.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

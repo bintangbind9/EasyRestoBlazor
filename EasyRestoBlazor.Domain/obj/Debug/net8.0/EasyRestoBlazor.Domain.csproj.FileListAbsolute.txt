@@ -1,0 +1,12 @@
+D:\Users\bsi90887\Documents\projects\pesan_makanan\EasyRestoBlazor\EasyRestoBlazor.Domain\bin\Debug\net8.0\EasyRestoBlazor.Domain.deps.json
+D:\Users\bsi90887\Documents\projects\pesan_makanan\EasyRestoBlazor\EasyRestoBlazor.Domain\bin\Debug\net8.0\EasyRestoBlazor.Domain.dll
+D:\Users\bsi90887\Documents\projects\pesan_makanan\EasyRestoBlazor\EasyRestoBlazor.Domain\bin\Debug\net8.0\EasyRestoBlazor.Domain.pdb
+D:\Users\bsi90887\Documents\projects\pesan_makanan\EasyRestoBlazor\EasyRestoBlazor.Domain\obj\Debug\net8.0\EasyRestoBlazor.Domain.csproj.AssemblyReference.cache
+D:\Users\bsi90887\Documents\projects\pesan_makanan\EasyRestoBlazor\EasyRestoBlazor.Domain\obj\Debug\net8.0\EasyRestoBlazor.Domain.GeneratedMSBuildEditorConfig.editorconfig
+D:\Users\bsi90887\Documents\projects\pesan_makanan\EasyRestoBlazor\EasyRestoBlazor.Domain\obj\Debug\net8.0\EasyRestoBlazor.Domain.AssemblyInfoInputs.cache
+D:\Users\bsi90887\Documents\projects\pesan_makanan\EasyRestoBlazor\EasyRestoBlazor.Domain\obj\Debug\net8.0\EasyRestoBlazor.Domain.AssemblyInfo.cs
+D:\Users\bsi90887\Documents\projects\pesan_makanan\EasyRestoBlazor\EasyRestoBlazor.Domain\obj\Debug\net8.0\EasyRestoBlazor.Domain.csproj.CoreCompileInputs.cache
+D:\Users\bsi90887\Documents\projects\pesan_makanan\EasyRestoBlazor\EasyRestoBlazor.Domain\obj\Debug\net8.0\EasyRestoBlazor.Domain.dll
+D:\Users\bsi90887\Documents\projects\pesan_makanan\EasyRestoBlazor\EasyRestoBlazor.Domain\obj\Debug\net8.0\refint\EasyRestoBlazor.Domain.dll
+D:\Users\bsi90887\Documents\projects\pesan_makanan\EasyRestoBlazor\EasyRestoBlazor.Domain\obj\Debug\net8.0\EasyRestoBlazor.Domain.pdb
+D:\Users\bsi90887\Documents\projects\pesan_makanan\EasyRestoBlazor\EasyRestoBlazor.Domain\obj\Debug\net8.0\ref\EasyRestoBlazor.Domain.dll

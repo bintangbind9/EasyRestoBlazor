@@ -1,0 +1,13 @@
+.vs
+
+EasyRestoBlazor/bin
+EasyRestoBlazor/obj
+
+EasyRestoBlazor.Application/bin
+EasyRestoBlazor.Application/obj
+
+EasyRestoBlazor.Domain/bin
+EasyRestoBlazor.Domain/obj
+
+EasyRestoBlazor.Infrastructure/bin
+EasyRestoBlazor.Infrastructure/obj

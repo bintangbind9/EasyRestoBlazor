@@ -45,7 +45,7 @@ namespace EasyRestoBlazor.Infrastructure.Repository
 
         public async Task Logout()
         {
-            throw new NotImplementedException();
+            await _sessionStorageService.RemoveItemAsync(SessionCode.EasyRestoAuth.ToString());
         }
     }
 }

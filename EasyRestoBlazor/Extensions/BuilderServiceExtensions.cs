@@ -1,4 +1,6 @@
-﻿using EasyRestoBlazor.Application.Repository;
+﻿using EasyRestoBlazor.Application.Contracts.Request;
+using EasyRestoBlazor.Application.Contracts.Response;
+using EasyRestoBlazor.Application.Repository;
 using EasyRestoBlazor.Infrastructure.Repository;
 
 namespace EasyRestoBlazor.Extensions
@@ -8,6 +10,7 @@ namespace EasyRestoBlazor.Extensions
         public static IServiceCollection AddAppDI(this IServiceCollection services)
         {
             services.AddTransient<IAuthRepository, AuthRepository>();
+            services.AddTransient<IBaseRepository<CreateFoodCategoryRequest, UpdateFoodCategoryRequest, FoodCategoryResponse>, FoodCategoryRepository>();
 
             return services;
         }

@@ -5,11 +5,11 @@ VisualStudioVersion = 17.11.35208.52
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyRestoBlazor", "EasyRestoBlazor\EasyRestoBlazor.csproj", "{28A42AF1-F6AF-4A59-9D1E-18A64870C5FB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyRestoBlazor.Application", "EasyRestoBlazor.Application\EasyRestoBlazor.Application.csproj", "{263CC7C9-7BF8-40FC-8F38-FBA8AE9A2613}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyRestoBlazor.Application", "EasyRestoBlazor.Application\EasyRestoBlazor.Application.csproj", "{263CC7C9-7BF8-40FC-8F38-FBA8AE9A2613}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyRestoBlazor.Domain", "EasyRestoBlazor.Domain\EasyRestoBlazor.Domain.csproj", "{4BB891EF-24B2-406E-BCF3-7EF4D9BF85D8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyRestoBlazor.Domain", "EasyRestoBlazor.Domain\EasyRestoBlazor.Domain.csproj", "{4BB891EF-24B2-406E-BCF3-7EF4D9BF85D8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyRestoBlazor.Infrastructure", "EasyRestoBlazor.Infrastructure\EasyRestoBlazor.Infrastructure.csproj", "{7F5A8132-6EB9-454B-87FC-AA08559C7F77}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyRestoBlazor.Infrastructure", "EasyRestoBlazor.Infrastructure\EasyRestoBlazor.Infrastructure.csproj", "{7F5A8132-6EB9-454B-87FC-AA08559C7F77}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

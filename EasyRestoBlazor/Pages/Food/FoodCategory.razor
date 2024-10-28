@@ -1,0 +1,115 @@
+﻿@page "/food/category"
+
+@inject HttpClient httpClient
+@inject IBaseRepository<CreateFoodCategoryRequest, UpdateFoodCategoryRequest, FoodCategoryResponse> foodCategoryRepository
+@inject NavigationManager navigationManager
+@inject ISnackbar snackbar
+@inject IDialogService DialogService
+
+<PageTitle>Food Category</PageTitle>
+
+<MudTable @ref="_table" T="FoodCategoryResponse" Items="@Elements" Dense="@dense" Hover="@hover" Bordered="false" Striped="false"
+          Filter="new Func<FoodCategoryResponse,bool>(FilterFunc1)" @bind-SelectedItems="selectedItems" MultiSelection="true" SelectionChangeable="true" OnRowClick="OnRowClick" SelectOnRowClick="false">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Food Categories</MudText>
+        <MudSpacer />
+        <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        <MudIconButton Icon="@Icons.Material.Outlined.Delete" Class="ml-4" OnClick="DeleteItems" />
+        <MudIconButton Icon="@Icons.Material.Outlined.Add" OnClick="GoToAddPage" />
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>Code</MudTh>
+        <MudTh>Name</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Code">@context.Code</MudTd>
+        <MudTd DataLabel="Name">@context.Name</MudTd>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager />
+    </PagerContent>
+</MudTable>
+
+@code {
+    private bool dense = true;
+    private bool hover = true;
+    private string searchString = "";
+    private MudTable<FoodCategoryResponse> _table;
+    private HashSet<FoodCategoryResponse> selectedItems = new HashSet<FoodCategoryResponse>();
+
+    private IEnumerable<FoodCategoryResponse> Elements = new List<FoodCategoryResponse>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        LoadElements();
+    }
+
+    private async void LoadElements()
+    {
+        try
+        {
+            Elements = await foodCategoryRepository.GetAllAsync();
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+
+    private bool FilterFunc1(FoodCategoryResponse element) => FilterFunc(element, searchString);
+
+    private bool FilterFunc(FoodCategoryResponse element, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (element.Code.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
+
+    private void GoToAddPage()
+    {
+        navigationManager.NavigateTo(Routes.FoodCategoryCreate);
+    }
+
+    private void OnRowClick(TableRowClickEventArgs<FoodCategoryResponse> args)
+    {
+        if (args.Item is not null)
+        {
+            navigationManager.NavigateTo($"{Routes.FoodCategoryUpdate}/{args.Item.Id}");
+        }
+    }
+
+    private async Task DeleteItems()
+    {
+        if (!selectedItems.Any()) return;
+
+        var parameters = new DialogParameters
+        {
+            { "Title", "Delete Item(s)" },
+            { "Message", $"Are you sure you want to delete {selectedItems.Count} item(s)?" }
+        };
+
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+        var dialog = DialogService.Show<ConfirmationDialog>("Delete Items", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            try
+            {
+                DeleteItemsRequest request = new DeleteItemsRequest { Ids = selectedItems.Select(e => e.Id).ToList()};
+                await foodCategoryRepository.DeletesAsync(request);
+                snackbar.Add("Successfully delete selected items.", Severity.Success);
+                LoadElements();
+            }
+            catch (Exception ex)
+            {
+                snackbar.Add(ex.Message, Severity.Error);
+            }
+        }
+    }
+}

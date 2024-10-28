@@ -1,0 +1,78 @@
+﻿@page "/food/category/update/{Id}"
+
+@inject HttpClient httpClient
+@inject IBaseRepository<CreateFoodCategoryRequest, UpdateFoodCategoryRequest, FoodCategoryResponse> foodCategoryRepository
+@inject NavigationManager navigationManager
+@inject ISnackbar snackbar
+
+<PageTitle>Update Food Category</PageTitle>
+
+<EditForm Model="@model" OnValidSubmit="Update">
+    <DataAnnotationsValidator />
+    <MudCard>
+        <MudCardHeader>
+            <CardHeaderAvatar>
+                <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" aria-label="back" OnClick="GoBack" />
+            </CardHeaderAvatar>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h6">Update Food Category</MudText>
+            </CardHeaderContent>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudTextField Label="Code"
+                          @bind-Value="obj.Code" Disabled="true" />
+            <MudTextField Label="Name" Class="mt-3"
+                          @bind-Value="model.Name" For="@(() => model.Name)" />
+        </MudCardContent>
+        <MudCardActions>
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Update</MudButton>
+        </MudCardActions>
+    </MudCard>
+</EditForm>
+
+@code {
+    [Parameter]
+    public String Id { get; set; }
+
+    private Guid _guidId;
+
+    FoodCategoryResponse obj = new FoodCategoryResponse();
+    UpdateFoodCategoryRequest model = new UpdateFoodCategoryRequest();
+
+    protected override async void OnInitialized()
+    {
+        try
+        {
+            bool isValidGuid = Guid.TryParse(Id, out _guidId);
+            if (!isValidGuid) throw new Exception("Id is invalid!");
+
+            obj = await foodCategoryRepository.GetByIdAsync(_guidId);
+            model.Name = obj.Name;
+
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            snackbar.Add(ex.Message, Severity.Error);
+            GoBack();
+        }
+    }
+
+    private async void Update()
+    {
+        try
+        {
+            await foodCategoryRepository.UpdateAsync(_guidId, model);
+            GoBack();
+        }
+        catch (Exception ex)
+        {
+            snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+
+    private void GoBack()
+    {
+        navigationManager.NavigateTo(Routes.FoodCategory);
+    }
+}

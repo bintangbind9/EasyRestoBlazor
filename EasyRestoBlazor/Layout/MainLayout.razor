@@ -1,6 +1,8 @@
 ﻿@inherits LayoutComponentBase
 
-@inject ISessionStorageService SessionStorageService
+@inject ISessionStorageService sessionStorageService
+@inject IAuthRepository authRepository
+@inject NavigationManager navigationManager
 
 <AuthenticationGuard />
 
@@ -25,7 +27,9 @@
                              ToggledIcon="@Icons.Material.Filled.DarkMode"
                              ToggledColor="@Color.Inherit"
                              title="@(_isDarkMode ? "Dark" : "Light")" />
-        <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End" />
+        <MudMenu Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" AriaLabel="Open user menu" AnchorOrigin="Origin.BottomCenter">
+            <MudMenuItem Icon="@Icons.Material.Filled.Logout" IconColor="Color.Error" OnClick="Logout">Sign Out</MudMenuItem>
+        </MudMenu>
     </MudAppBar>
     <MudDrawer @bind-Open="_drawerOpen" Elevation="2">
         <MudDrawerHeader>
@@ -34,7 +38,7 @@
         <NavMenu />
     </MudDrawer>
     <MudMainContent>
-        <MudContainer MaxWidth="MaxWidth.Large">
+        <MudContainer MaxWidth="MaxWidth.Large" Class="pt-4">
             @Body
         </MudContainer>
     </MudMainContent>
@@ -46,7 +50,7 @@
 
     protected override async void OnInitialized()
     {
-        _isDarkMode = await SessionStorageService.GetItemAsync<bool>(SessionCode.EasyRestoIsDarkMode.ToString());
+        _isDarkMode = await sessionStorageService.GetItemAsync<bool>(SessionCode.EasyRestoIsDarkMode.ToString());
         StateHasChanged();
     }
 
@@ -58,7 +62,13 @@
     async void OnIsDarkChanged(bool isDark)
     {
         _isDarkMode = isDark;
-        await SessionStorageService.SetItemAsync<bool>(SessionCode.EasyRestoIsDarkMode.ToString(), _isDarkMode);
+        await sessionStorageService.SetItemAsync<bool>(SessionCode.EasyRestoIsDarkMode.ToString(), _isDarkMode);
         StateHasChanged();
+    }
+
+    private async void Logout()
+    {
+        await authRepository.Logout();
+        navigationManager.NavigateTo(Routes.Login);
     }
 }

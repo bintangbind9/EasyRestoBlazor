@@ -1,9 +1,6 @@
 ﻿<MudNavMenu>
-    <MudNavLink Href="/" Match="NavLinkMatch.All">Dashboard</MudNavLink>
-    <MudNavLink Href="/counter" Match="NavLinkMatch.Prefix">Counter</MudNavLink>
-    <MudNavLink Href="/weather" Match="NavLinkMatch.Prefix">Weather</MudNavLink>
-    <MudNavGroup Title="Settings" Expanded="true">
-        <MudNavLink Href="/users" Match="NavLinkMatch.Prefix">Users</MudNavLink>
-        <MudNavLink Href="/security" Match="NavLinkMatch.Prefix">Security</MudNavLink>
+    <MudNavLink Href="@Routes.Dashboard" Match="NavLinkMatch.Prefix">Dashboard</MudNavLink>
+    <MudNavGroup Title="Masters" Expanded="false">
+        <MudNavLink Href="@Routes.FoodCategory" Match="NavLinkMatch.Prefix">Food Category</MudNavLink>
     </MudNavGroup>
 </MudNavMenu>

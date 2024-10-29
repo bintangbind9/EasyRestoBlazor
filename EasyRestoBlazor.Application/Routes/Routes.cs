@@ -13,5 +13,8 @@
         public const string DiningTable = $"{Root}dining-table";
         public const string DiningTableCreate = $"{DiningTable}/create";
         public const string DiningTableUpdate = $"{DiningTable}/update";
+        public const string AppUser = $"{Root}app-user";
+        public const string AppUserCreate = $"{AppUser}/create";
+        public const string AppUserUpdate = $"{AppUser}/update";
     }
 }

@@ -1,0 +1,117 @@
+﻿@page "/app-user"
+
+@inject HttpClient httpClient
+@inject IBaseRepository<CreateAppUserRequest, UpdateAppUserRequest, AppUserResponse> appUserRepository
+@inject NavigationManager navigationManager
+@inject ISnackbar snackbar
+@inject IDialogService DialogService
+
+<PageTitle>App User</PageTitle>
+
+<MudTable @ref="_table" T="AppUserResponse" Items="@Elements" Dense="@dense" Hover="@hover" Bordered="false" Striped="false"
+          Filter="new Func<AppUserResponse,bool>(FilterFunc1)" @bind-SelectedItems="selectedItems" MultiSelection="true" SelectionChangeable="true" OnRowClick="OnRowClick" SelectOnRowClick="false">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">App Users</MudText>
+        <MudSpacer />
+        <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        <MudIconButton Icon="@Icons.Material.Outlined.Delete" Class="ml-4" OnClick="DeleteItems" />
+        <MudIconButton Icon="@Icons.Material.Outlined.Add" OnClick="GoToAddPage" />
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>Username</MudTh>
+        <MudTh>Name</MudTh>
+        <MudTh>Is Active</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Username">@context.Username</MudTd>
+        <MudTd DataLabel="Name">@context.Name</MudTd>
+        <MudTd DataLabel="Is Active"><MudCheckBox Value="context.IsActive" Disabled="true"></MudCheckBox></MudTd>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager />
+    </PagerContent>
+</MudTable>
+
+@code {
+    private bool dense = true;
+    private bool hover = true;
+    private string searchString = "";
+    private MudTable<AppUserResponse> _table;
+    private HashSet<AppUserResponse> selectedItems = new HashSet<AppUserResponse>();
+
+    private IEnumerable<AppUserResponse> Elements = new List<AppUserResponse>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        LoadElements();
+    }
+
+    private async void LoadElements()
+    {
+        try
+        {
+            Elements = await appUserRepository.GetAllAsync();
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+
+    private bool FilterFunc1(AppUserResponse element) => FilterFunc(element, searchString);
+
+    private bool FilterFunc(AppUserResponse element, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (element.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.Username.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
+
+    private void GoToAddPage()
+    {
+        navigationManager.NavigateTo(Routes.AppUserCreate);
+    }
+
+    private void OnRowClick(TableRowClickEventArgs<AppUserResponse> args)
+    {
+        if (args.Item is not null)
+        {
+            navigationManager.NavigateTo($"{Routes.AppUserUpdate}/{args.Item.Id}");
+        }
+    }
+
+    private async Task DeleteItems()
+    {
+        if (!selectedItems.Any()) return;
+
+        var parameters = new DialogParameters
+        {
+            { "Title", "Delete Item(s)" },
+            { "Message", $"Are you sure you want to delete {selectedItems.Count} item(s)?" }
+        };
+
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+        var dialog = DialogService.Show<ConfirmationDialog>("Delete Items", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            try
+            {
+                DeleteItemsRequest request = new DeleteItemsRequest { Ids = selectedItems.Select(e => e.Id).ToList() };
+                await appUserRepository.DeletesAsync(request);
+                snackbar.Add("Successfully delete selected items.", Severity.Success);
+                LoadElements();
+            }
+            catch (Exception ex)
+            {
+                snackbar.Add(ex.Message, Severity.Error);
+            }
+        }
+    }
+}

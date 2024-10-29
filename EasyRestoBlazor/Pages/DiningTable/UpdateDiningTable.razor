@@ -1,11 +1,11 @@
-﻿@page "/food/category/update/{Id}"
+﻿@page "/dining-table/update/{Id}"
 
 @inject HttpClient httpClient
-@inject IBaseRepository<CreateFoodCategoryRequest, UpdateFoodCategoryRequest, FoodCategoryResponse> foodCategoryRepository
+@inject IBaseRepository<CreateDiningTableRequest, UpdateDiningTableRequest, DiningTableResponse> diningTableRepository
 @inject NavigationManager navigationManager
 @inject ISnackbar snackbar
 
-<PageTitle>Update Food Category</PageTitle>
+<PageTitle>Update Dining Table</PageTitle>
 
 <EditForm Model="@model" OnValidSubmit="Update">
     <DataAnnotationsValidator />
@@ -15,7 +15,7 @@
                 <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" aria-label="back" OnClick="GoBack" />
             </CardHeaderAvatar>
             <CardHeaderContent>
-                <MudText Typo="Typo.h6">Update Food Category</MudText>
+                <MudText Typo="Typo.h6">Update Dining Table</MudText>
             </CardHeaderContent>
         </MudCardHeader>
         <MudCardContent>
@@ -23,6 +23,8 @@
                           @bind-Value="obj.Code" Disabled="true" />
             <MudTextField Label="Name" Class="mt-3"
                           @bind-Value="model.Name" For="@(() => model.Name)" />
+            <MudNumericField Label="Capacity" Class="mt-3"
+                          @bind-Value="model.Capacity" For="@(() => model.Capacity)" />
         </MudCardContent>
         <MudCardActions>
             <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Update</MudButton>
@@ -36,8 +38,8 @@
 
     private Guid _guidId;
 
-    FoodCategoryResponse obj = new FoodCategoryResponse();
-    UpdateFoodCategoryRequest model = new UpdateFoodCategoryRequest();
+    DiningTableResponse obj = new DiningTableResponse();
+    UpdateDiningTableRequest model = new UpdateDiningTableRequest();
 
     protected override async void OnInitialized()
     {
@@ -46,8 +48,9 @@
             bool isValidGuid = Guid.TryParse(Id, out _guidId);
             if (!isValidGuid) throw new Exception("Id is invalid!");
 
-            obj = await foodCategoryRepository.GetByIdAsync(_guidId);
+            obj = await diningTableRepository.GetByIdAsync(_guidId);
             model.Name = obj.Name;
+            model.Capacity = obj.Capacity;
 
             StateHasChanged();
         }
@@ -62,7 +65,7 @@
     {
         try
         {
-            await foodCategoryRepository.UpdateAsync(_guidId, model);
+            await diningTableRepository.UpdateAsync(_guidId, model);
             snackbar.Add("Successfully update item.", Severity.Success);
             GoBack();
         }
@@ -74,6 +77,6 @@
 
     private void GoBack()
     {
-        navigationManager.NavigateTo(Routes.FoodCategory);
+        navigationManager.NavigateTo(Routes.DiningTable);
     }
 }

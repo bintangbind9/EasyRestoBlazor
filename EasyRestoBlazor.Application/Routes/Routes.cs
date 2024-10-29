@@ -10,5 +10,8 @@
         public const string FoodCategory = $"{Food}/category";
         public const string FoodCategoryCreate = $"{FoodCategory}/create";
         public const string FoodCategoryUpdate = $"{FoodCategory}/update";
+        public const string DiningTable = $"{Root}dining-table";
+        public const string DiningTableCreate = $"{DiningTable}/create";
+        public const string DiningTableUpdate = $"{DiningTable}/update";
     }
 }

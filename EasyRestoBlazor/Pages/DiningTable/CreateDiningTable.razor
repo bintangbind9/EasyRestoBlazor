@@ -1,11 +1,11 @@
-﻿@page "/food/category/create"
+﻿@page "/dining-table/create"
 
 @inject HttpClient httpClient
-@inject IBaseRepository<CreateFoodCategoryRequest, UpdateFoodCategoryRequest, FoodCategoryResponse> foodCategoryRepository
+@inject IBaseRepository<CreateDiningTableRequest, UpdateDiningTableRequest, DiningTableResponse> diningTableRepository
 @inject NavigationManager navigationManager
 @inject ISnackbar snackbar
 
-<PageTitle>Create Food Category</PageTitle>
+<PageTitle>Create Dining Table</PageTitle>
 
 <EditForm Model="@model" OnValidSubmit="Add">
     <DataAnnotationsValidator />
@@ -15,7 +15,7 @@
                 <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" aria-label="back" OnClick="GoBack" />
             </CardHeaderAvatar>
             <CardHeaderContent>
-                <MudText Typo="Typo.h6">Create Food Category</MudText>
+                <MudText Typo="Typo.h6">Create Dining Table</MudText>
             </CardHeaderContent>
         </MudCardHeader>
         <MudCardContent>
@@ -23,6 +23,8 @@
                           @bind-Value="model.Code" For="@(() => model.Code)" />
             <MudTextField Label="Name" Class="mt-3"
                           @bind-Value="model.Name" For="@(() => model.Name)" />
+            <MudNumericField Label="Capacity"
+                          @bind-Value="model.Capacity" For="@(() => model.Capacity)" />
         </MudCardContent>
         <MudCardActions>
             <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Add</MudButton>
@@ -31,13 +33,13 @@
 </EditForm>
 
 @code {
-    CreateFoodCategoryRequest model = new CreateFoodCategoryRequest();
+    CreateDiningTableRequest model = new CreateDiningTableRequest();
 
     private async void Add()
     {
         try
         {
-            await foodCategoryRepository.CreateAsync(model);
+            await diningTableRepository.CreateAsync(model);
             snackbar.Add("Successfully add item.", Severity.Success);
             GoBack();
         }
@@ -49,6 +51,6 @@
 
     private void GoBack()
     {
-        navigationManager.NavigateTo(Routes.FoodCategory);
+        navigationManager.NavigateTo(Routes.DiningTable);
     }
 }

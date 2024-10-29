@@ -70,6 +70,7 @@
     private MudTable<RoleResponse> _roleTable;
     private HashSet<RoleResponse> selectedRoles = new HashSet<RoleResponse>();
     private IEnumerable<RoleResponse> roles = new List<RoleResponse>();
+    private List<Guid> currentRoleIds = new List<Guid>();
 
     protected override async void OnInitialized()
     {
@@ -83,6 +84,7 @@
             model.IsActive = obj.IsActive;
 
             LoadRoles();
+            currentRoleIds = obj.Roles.Select(e => e.Id).ToList();
             selectedRoles = obj.Roles.ToHashSet<RoleResponse>();
 
             StateHasChanged();
@@ -125,6 +127,11 @@
         try
         {
             _isLoading = true;
+
+            List<Guid> selectedRoleIds = selectedRoles.Select(e => e.Id).ToList();
+
+            model.RoleIdsToAdd = selectedRoleIds.Except(currentRoleIds).ToList();
+            model.RoleIdsToRemove = currentRoleIds.Except(selectedRoleIds).ToList();
 
             await appUserRepository.UpdateAsync(_guidId, model);
             snackbar.Add("Successfully update user.", Severity.Success);

@@ -45,14 +45,31 @@ namespace EasyRestoBlazor.Infrastructure.Repository
             return baseResponse.Data;
         }
 
-        public Task<RoleResponse> GetByIdAsync(Guid id)
+        public async Task<RoleResponse> GetByIdAsync(Guid id)
         {
-            throw new NotImplementedException();
+            var response = await _http.GetAsync($"{_url}/{id}");
+
+            var baseResponse = await response.Content.ReadFromJsonAsync<BaseResponse<RoleResponse>>();
+
+            if (baseResponse.Status != 200)
+            {
+                throw new Exception(baseResponse.Errors.Any() ? baseResponse.Errors[0] : $"Failed Get {_objName}!");
+            }
+
+            return baseResponse.Data;
         }
 
-        public Task UpdateAsync(Guid id, UpdateRoleRequest obj)
+        public async Task UpdateAsync(Guid id, UpdateRoleRequest obj)
         {
-            throw new NotImplementedException();
+            var jsonContent = JsonContent.Create(obj);
+            var response = await _http.PutAsync($"{_url}/{id}", jsonContent);
+
+            var baseResponse = await response.Content.ReadFromJsonAsync<BaseResponse<string>>();
+
+            if (baseResponse.Status != 200)
+            {
+                throw new Exception(baseResponse.Errors.Any() ? baseResponse.Errors[0] : $"Failed Update {_objName}!");
+            }
         }
     }
 }

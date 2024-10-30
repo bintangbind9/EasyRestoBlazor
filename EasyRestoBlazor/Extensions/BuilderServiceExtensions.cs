@@ -14,6 +14,7 @@ namespace EasyRestoBlazor.Extensions
             services.AddTransient<IBaseRepository<CreateDiningTableRequest, UpdateDiningTableRequest, DiningTableResponse>, DiningTableRepository>();
             services.AddTransient<IBaseRepository<CreateAppUserRequest, UpdateAppUserRequest, AppUserResponse>, AppUserRepository>();
             services.AddTransient<IBaseRepository<CreateRoleRequest, UpdateRoleRequest, RoleResponse>, RoleRepository>();
+            services.AddTransient<IBaseRepository<CreatePrivilegeRequest, UpdatePrivilegeRequest, PrivilegeResponse>, PrivilegeRepository>();
 
             return services;
         }

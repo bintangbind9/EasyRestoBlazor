@@ -1,0 +1,151 @@
+﻿@page "/role/update/{Id}"
+
+@inject HttpClient httpClient
+@inject IBaseRepository<CreateRoleRequest, UpdateRoleRequest, RoleResponse> roleRepository
+@inject IBaseRepository<CreatePrivilegeRequest, UpdatePrivilegeRequest, PrivilegeResponse> privilegeRepository
+@inject NavigationManager navigationManager
+@inject ISnackbar snackbar
+
+<PageTitle>Update Role</PageTitle>
+
+<EditForm Model="@model" OnValidSubmit="Update">
+    <DataAnnotationsValidator />
+    <MudCard>
+        <MudCardHeader>
+            <CardHeaderAvatar>
+                <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" aria-label="back" OnClick="GoBack" />
+            </CardHeaderAvatar>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h6">Update Role</MudText>
+            </CardHeaderContent>
+            <CardHeaderActions>
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Save</MudButton>
+            </CardHeaderActions>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudTextField Label="Code"
+                          @bind-Value="obj.Code" Disabled="true" />
+            <MudTextField Label="Name" Class="mt-3"
+                          @bind-Value="model.Name" For="@(() => model.Name)" />
+        </MudCardContent>
+    </MudCard>
+</EditForm>
+
+<MudTable @ref="_privilegeTable" T="PrivilegeResponse" Items="@privileges" Dense="true" Hover="true" Bordered="false" Striped="false" Class="mt-4 mb-4"
+          Filter="new Func<PrivilegeResponse,bool>(FilterFunc1)" @bind-SelectedItems="selectedPrivileges" MultiSelection="true" SelectionChangeable="true" SelectOnRowClick="true">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Select Privileges</MudText>
+        <MudSpacer />
+        <MudTextField @bind-Value="searchPrivilege" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>Code</MudTh>
+        <MudTh>Name</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Code">@context.Code</MudTd>
+        <MudTd DataLabel="Name">@context.Name</MudTd>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager />
+    </PagerContent>
+</MudTable>
+
+<LoadingOverlay IsLoading="_isLoading" />
+
+@code {
+    [Parameter]
+    public String Id { get; set; }
+    private Guid _guidId;
+
+    private bool _isLoading = false;
+
+    RoleResponse obj = new RoleResponse();
+    UpdateRoleRequest model = new UpdateRoleRequest();
+
+    private string searchPrivilege = "";
+    private MudTable<PrivilegeResponse> _privilegeTable;
+    private HashSet<PrivilegeResponse> selectedPrivileges = new HashSet<PrivilegeResponse>();
+    private IEnumerable<PrivilegeResponse> privileges = new List<PrivilegeResponse>();
+    private List<Guid> currentPrivilegeIds = new List<Guid>();
+
+    protected override async void OnInitialized()
+    {
+        try
+        {
+            bool isValidGuid = Guid.TryParse(Id, out _guidId);
+            if (!isValidGuid) throw new Exception("Id is invalid!");
+
+            obj = await roleRepository.GetByIdAsync(_guidId);
+            model.Name = obj.Name;
+
+            LoadPrivileges();
+            currentPrivilegeIds = obj.Privileges.Select(e => e.Id).ToList();
+            selectedPrivileges = obj.Privileges.ToHashSet<PrivilegeResponse>();
+
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            snackbar.Add(ex.Message, Severity.Error);
+            GoBack();
+        }
+    }
+
+    private async void LoadPrivileges()
+    {
+        try
+        {
+            privileges = await privilegeRepository.GetAllAsync();
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+
+    private bool FilterFunc1(PrivilegeResponse element) => FilterFunc(element, searchPrivilege);
+
+    private bool FilterFunc(PrivilegeResponse element, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (element.Code.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
+
+    private async void Update()
+    {
+        try
+        {
+            _isLoading = true;
+
+            List<Guid> selectedPrivilegeIds = selectedPrivileges.Select(e => e.Id).ToList();
+
+            model.PrivilegeIdsToAdd = selectedPrivilegeIds.Except(currentPrivilegeIds).ToList();
+            model.PrivilegeIdsToRemove = currentPrivilegeIds.Except(selectedPrivilegeIds).ToList();
+
+            await roleRepository.UpdateAsync(_guidId, model);
+            snackbar.Add("Successfully update role.", Severity.Success);
+            GoBack();
+        }
+        catch (Exception ex)
+        {
+            snackbar.Add(ex.Message, Severity.Error);
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void GoBack()
+    {
+        navigationManager.NavigateTo(Routes.Role);
+    }
+}

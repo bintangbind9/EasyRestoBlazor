@@ -1,6 +1,6 @@
 ﻿namespace EasyRestoBlazor.Application.Contracts.Response
 {
-    public class RoleResponse : IEquatable<RoleResponse>
+    public class PrivilegeResponse : IEquatable<PrivilegeResponse>
     {
         public Guid Id { get; set; }
 
@@ -8,9 +8,7 @@
 
         public string Name { get; set; }
 
-        public List<PrivilegeResponse> Privileges { get; set; } = new List<PrivilegeResponse>();
-
-        public bool Equals(RoleResponse? other)
+        public bool Equals(PrivilegeResponse? other)
         {
             if (other == null) return false;
 
@@ -19,7 +17,7 @@
 
         public override bool Equals(object obj)
         {
-            return Equals(obj as RoleResponse);
+            return Equals(obj as PrivilegeResponse);
         }
 
         public override int GetHashCode()

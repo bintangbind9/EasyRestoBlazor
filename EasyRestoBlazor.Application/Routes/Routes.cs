@@ -16,5 +16,8 @@
         public const string AppUser = $"{Root}app-user";
         public const string AppUserCreate = $"{AppUser}/create";
         public const string AppUserUpdate = $"{AppUser}/update";
+        public const string Role = $"{Root}role";
+        public const string RoleCreate = $"{Role}/create";
+        public const string RoleUpdate = $"{Role}/update";
     }
 }

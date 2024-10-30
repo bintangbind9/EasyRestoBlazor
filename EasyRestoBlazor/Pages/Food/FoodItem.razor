@@ -1,0 +1,121 @@
+﻿@page "/food-item"
+
+@inject HttpClient httpClient
+@inject IBaseRepository<CreateFoodItemRequest, UpdateFoodItemRequest, FoodItemResponse> foodItemRepository
+@inject NavigationManager navigationManager
+@inject ISnackbar snackbar
+@inject IDialogService DialogService
+
+<PageTitle>Food</PageTitle>
+
+<MudTable @ref="_table" T="FoodItemResponse" Items="@Elements" Dense="@dense" Hover="@hover" Bordered="false" Striped="false"
+          Filter="new Func<FoodItemResponse,bool>(FilterFunc1)" @bind-SelectedItems="selectedItems" MultiSelection="true" SelectionChangeable="true" OnRowClick="OnRowClick" SelectOnRowClick="false">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Foods</MudText>
+        <MudSpacer />
+        <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        <MudIconButton Icon="@Icons.Material.Outlined.Delete" Class="ml-4" OnClick="DeleteItems" />
+        <MudIconButton Icon="@Icons.Material.Outlined.Add" OnClick="GoToAddPage" />
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>Code</MudTh>
+        <MudTh>Category</MudTh>
+        <MudTh>Name</MudTh>
+        <MudTh>Price</MudTh>
+        <MudTh>Status</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Code">@context.Code</MudTd>
+        <MudTd DataLabel="Category">@context.FoodCategory.Name</MudTd>
+        <MudTd DataLabel="Name">@context.Name</MudTd>
+        <MudTd DataLabel="Price">@context.Price</MudTd>
+        <MudTd DataLabel="Status">@context.FoodItemStatus.Name</MudTd>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager />
+    </PagerContent>
+</MudTable>
+
+@code {
+    private bool dense = true;
+    private bool hover = true;
+    private string searchString = "";
+    private MudTable<FoodItemResponse> _table;
+    private HashSet<FoodItemResponse> selectedItems = new HashSet<FoodItemResponse>();
+
+    private IEnumerable<FoodItemResponse> Elements = new List<FoodItemResponse>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        LoadElements();
+    }
+
+    private async void LoadElements()
+    {
+        try
+        {
+            Elements = await foodItemRepository.GetAllAsync();
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+
+    private bool FilterFunc1(FoodItemResponse element) => FilterFunc(element, searchString);
+
+    private bool FilterFunc(FoodItemResponse element, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (element.Code.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
+
+    private void GoToAddPage()
+    {
+        navigationManager.NavigateTo(Routes.FoodItemCreate);
+    }
+
+    private void OnRowClick(TableRowClickEventArgs<FoodItemResponse> args)
+    {
+        if (args.Item is not null)
+        {
+            navigationManager.NavigateTo($"{Routes.FoodItemUpdate}/{args.Item.Id}");
+        }
+    }
+
+    private async Task DeleteItems()
+    {
+        if (!selectedItems.Any()) return;
+
+        var parameters = new DialogParameters
+        {
+            { "Title", "Delete Item(s)" },
+            { "Message", $"Are you sure you want to delete {selectedItems.Count} item(s)?" }
+        };
+
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+        var dialog = DialogService.Show<ConfirmationDialog>("Delete Items", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            try
+            {
+                DeleteItemsRequest request = new DeleteItemsRequest { Ids = selectedItems.Select(e => e.Id).ToList() };
+                await foodItemRepository.DeletesAsync(request);
+                snackbar.Add("Successfully delete selected items.", Severity.Success);
+                LoadElements();
+            }
+            catch (Exception ex)
+            {
+                snackbar.Add(ex.Message, Severity.Error);
+            }
+        }
+    }
+}

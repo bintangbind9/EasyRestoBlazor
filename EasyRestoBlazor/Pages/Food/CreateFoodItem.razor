@@ -1,0 +1,83 @@
+﻿@page "/food-item/create"
+
+@inject HttpClient httpClient
+@inject IBaseRepository<CreateFoodItemRequest, UpdateFoodItemRequest, FoodItemResponse> foodItemRepository
+@inject IBaseRepository<CreateFoodCategoryRequest, UpdateFoodCategoryRequest, FoodCategoryResponse> foodCategoryRepository
+@inject IBaseRepository<CreateFoodItemStatusRequest, UpdateFoodItemStatusRequest, FoodItemStatusResponse> foodItemStatusRepository
+@inject NavigationManager navigationManager
+@inject ISnackbar snackbar
+
+<PageTitle>Create Food</PageTitle>
+
+<EditForm Model="@model" OnValidSubmit="Add">
+    <DataAnnotationsValidator />
+    <MudCard>
+        <MudCardHeader>
+            <CardHeaderAvatar>
+                <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" aria-label="back" OnClick="GoBack" />
+            </CardHeaderAvatar>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h6">Create Food</MudText>
+            </CardHeaderContent>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudTextField Label="Code"
+                          @bind-Value="model.Code" For="@(() => model.Code)" />
+            <MudSelect Label="Category" Class="mt-3"
+                          @bind-Value="model.FoodCategoryId" For="@(() => model.FoodCategoryId)">
+                @foreach (var foodCategory in foodCategories)
+                {
+                    <MudSelectItem Value="foodCategory.Id.ToString()">@foodCategory.Name</MudSelectItem>
+                }
+            </MudSelect>
+            <MudTextField Label="Name" Class="mt-3"
+                          @bind-Value="model.Name" For="@(() => model.Name)" />
+            <MudNumericField Label="Price" Class="mt-3" Immediate="false" Format="N2" Culture="@_en" T="decimal"
+                          @bind-Value="model.Price" For="@(() => model.Price)" />
+            <MudSelect Label="Status" Class="mt-3"
+                       @bind-Value="model.FoodItemStatusId" For="@(() => model.FoodItemStatusId)">
+                @foreach (var foodItemStatus in foodItemStatuses)
+                {
+                    <MudSelectItem Value="foodItemStatus.Id.ToString()">@foodItemStatus.Name</MudSelectItem>
+                }
+            </MudSelect>
+        </MudCardContent>
+        <MudCardActions>
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Add</MudButton>
+        </MudCardActions>
+    </MudCard>
+</EditForm>
+
+@code {
+    public CultureInfo _de = CultureInfo.GetCultureInfo("de-DE");
+    public CultureInfo _en = CultureInfo.GetCultureInfo("en-US");
+
+    CreateFoodItemRequest model = new CreateFoodItemRequest();
+    IEnumerable<FoodCategoryResponse> foodCategories = new List<FoodCategoryResponse>();
+    IEnumerable<FoodItemStatusResponse> foodItemStatuses = new List<FoodItemStatusResponse>();
+
+    protected override async void OnInitialized()
+    {
+        foodCategories = await foodCategoryRepository.GetAllAsync();
+        foodItemStatuses = await foodItemStatusRepository.GetAllAsync();
+    }
+
+    private async void Add()
+    {
+        try
+        {
+            await foodItemRepository.CreateAsync(model);
+            snackbar.Add("Successfully add new food.", Severity.Success);
+            GoBack();
+        }
+        catch (Exception ex)
+        {
+            snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+
+    private void GoBack()
+    {
+        navigationManager.NavigateTo(Routes.FoodItem);
+    }
+}

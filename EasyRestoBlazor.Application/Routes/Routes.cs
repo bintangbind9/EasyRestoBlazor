@@ -19,5 +19,8 @@
         public const string Role = $"{Root}role";
         public const string RoleCreate = $"{Role}/create";
         public const string RoleUpdate = $"{Role}/update";
+        public const string FoodItem = $"{Root}food-item";
+        public const string FoodItemCreate = $"{FoodItem}/create";
+        public const string FoodItemUpdate = $"{FoodItem}/update";
     }
 }

@@ -1,0 +1,108 @@
+﻿@page "/food-item/update/{Id}"
+
+@inject HttpClient httpClient
+@inject IBaseRepository<CreateFoodItemRequest, UpdateFoodItemRequest, FoodItemResponse> foodItemRepository
+@inject IBaseRepository<CreateFoodCategoryRequest, UpdateFoodCategoryRequest, FoodCategoryResponse> foodCategoryRepository
+@inject IBaseRepository<CreateFoodItemStatusRequest, UpdateFoodItemStatusRequest, FoodItemStatusResponse> foodItemStatusRepository
+@inject NavigationManager navigationManager
+@inject ISnackbar snackbar
+
+<PageTitle>Update Food</PageTitle>
+
+<EditForm Model="@model" OnValidSubmit="Update">
+    <DataAnnotationsValidator />
+    <MudCard>
+        <MudCardHeader>
+            <CardHeaderAvatar>
+                <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" aria-label="back" OnClick="GoBack" />
+            </CardHeaderAvatar>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h6">Update Food</MudText>
+            </CardHeaderContent>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudTextField Label="Code"
+                          @bind-Value="obj.Code" Disabled="true" />
+            <MudSelect Label="Category" Class="mt-3"
+                       @bind-Value="model.FoodCategoryId" For="@(() => model.FoodCategoryId)">
+                @foreach (var foodCategory in foodCategories)
+                {
+                    <MudSelectItem Value="foodCategory.Id.ToString()">@foodCategory.Name</MudSelectItem>
+                }
+            </MudSelect>
+            <MudTextField Label="Name" Class="mt-3"
+                          @bind-Value="model.Name" For="@(() => model.Name)" />
+            <MudNumericField Label="Price" Class="mt-3" Immediate="false" Format="N2" Culture="@_en" T="decimal"
+                          @bind-Value="model.Price" For="@(() => model.Price)" />
+            <MudSelect Label="Status" Class="mt-3"
+                       @bind-Value="model.FoodItemStatusId" For="@(() => model.FoodItemStatusId)">
+                @foreach (var foodItemStatus in foodItemStatuses)
+                {
+                    <MudSelectItem Value="foodItemStatus.Id.ToString()">@foodItemStatus.Name</MudSelectItem>
+                }
+            </MudSelect>
+        </MudCardContent>
+        <MudCardActions>
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Update</MudButton>
+        </MudCardActions>
+    </MudCard>
+</EditForm>
+
+@code {
+    [Parameter]
+    public String Id { get; set; }
+
+    private Guid _guidId;
+
+    public CultureInfo _en = CultureInfo.GetCultureInfo("en-US");
+
+    FoodItemResponse obj = new FoodItemResponse();
+    UpdateFoodItemRequest model = new UpdateFoodItemRequest();
+    IEnumerable<FoodCategoryResponse> foodCategories = new List<FoodCategoryResponse>();
+    IEnumerable<FoodItemStatusResponse> foodItemStatuses = new List<FoodItemStatusResponse>();
+
+    protected override async void OnInitialized()
+    {
+        try
+        {
+            bool isValidGuid = Guid.TryParse(Id, out _guidId);
+            if (!isValidGuid) throw new Exception("Id is invalid!");
+
+            foodCategories = await foodCategoryRepository.GetAllAsync();
+            foodItemStatuses = await foodItemStatusRepository.GetAllAsync();
+            StateHasChanged();
+
+            obj = await foodItemRepository.GetByIdAsync(_guidId);
+            model.FoodCategoryId = obj.FoodCategoryId.ToString();
+            model.FoodItemStatusId = obj.FoodItemStatusId.ToString();
+            model.Name = obj.Name;
+            model.Price = obj.Price;
+
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            snackbar.Add(ex.Message, Severity.Error);
+            GoBack();
+        }
+    }
+
+    private async void Update()
+    {
+        try
+        {
+            await foodItemRepository.UpdateAsync(_guidId, model);
+            snackbar.Add("Successfully update food.", Severity.Success);
+            GoBack();
+        }
+        catch (Exception ex)
+        {
+            snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+
+    private void GoBack()
+    {
+        navigationManager.NavigateTo(Routes.FoodItem);
+    }
+}

@@ -22,5 +22,8 @@
         public const string FoodItem = $"{Root}food-item";
         public const string FoodItemCreate = $"{FoodItem}/create";
         public const string FoodItemUpdate = $"{FoodItem}/update";
+        public const string Order = $"{Root}order";
+        public const string OrderCreate = $"{Order}/create";
+        public const string OrderUpdate = $"{Order}/update";
     }
 }

@@ -1,0 +1,149 @@
+﻿@page "/order/create"
+
+@inject HttpClient httpClient
+@inject IBaseRepository<CreateOrderRequest, UpdateOrderRequest, OrderResponse> orderRepository
+@inject IBaseRepository<CreateDiningTableRequest, UpdateDiningTableRequest, DiningTableResponse> diningTableRepository
+@inject IBaseRepository<CreateOrderStatusRequest, UpdateOrderStatusRequest, OrderStatusResponse> orderStatusRepository
+@inject IBaseRepository<CreateFoodItemRequest, UpdateFoodItemRequest, FoodItemResponse> foodItemRepository
+@inject NavigationManager navigationManager
+@inject ISnackbar snackbar
+@inject IDialogService dialogService
+
+<PageTitle>Create Order</PageTitle>
+
+<EditForm Model="@model" OnValidSubmit="Add">
+    <DataAnnotationsValidator />
+    <MudCard>
+        <MudCardHeader>
+            <CardHeaderAvatar>
+                <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" aria-label="back" OnClick="GoBack" />
+            </CardHeaderAvatar>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h6">Create Order</MudText>
+            </CardHeaderContent>
+            <CardHeaderActions>
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Save</MudButton>
+            </CardHeaderActions>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudSelect Label="Table"
+                       @bind-Value="model.DiningTableId" For="@(() => model.DiningTableId)">
+                @foreach (var diningTable in diningTables)
+                {
+                    <MudSelectItem Value="diningTable.Id.ToString()">@diningTable.Name</MudSelectItem>
+                }
+            </MudSelect>
+            <MudNumericField Label="Total Price" Class="mt-3" Immediate="false" Format="N2" Culture="@_en" T="decimal" ReadOnly="true"
+                             @bind-Value="model.TotalPrice" For="@(() => model.TotalPrice)" />
+            <MudNumericField Label="Tax (%)" Class="mt-3" Immediate="false" Format="N2" Culture="@_en" T="decimal"
+                             @bind-Value="model.Tax" For="@(() => model.Tax)" />
+            <MudNumericField Label="Bill Amount" Class="mt-3" Immediate="false" Format="N2" Culture="@_en" T="decimal" ReadOnly="true"
+                             @bind-Value="model.BillAmount" For="@(() => model.BillAmount)" />
+            <MudTextField Label="Customer Note" Class="mt-3" Lines="3"
+                          @bind-Value="model.CustomerNote" For="@(() => model.CustomerNote)" />
+        </MudCardContent>
+    </MudCard>
+</EditForm>
+
+<MudTable @ref="_table" T="OrderDetailRequest" Items="@model.OrderDetails" Dense="true" Hover="true" Bordered="false" Striped="false" Class="mt-4 mb-4"
+          Filter="new Func<OrderDetailRequest,bool>(FilterFunc1)" @bind-SelectedItems="selectedItems" MultiSelection="true" SelectionChangeable="true" SelectOnRowClick="true">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Selected Foods</MudText>
+        <MudSpacer />
+        <MudTextField @bind-Value="searchDetail" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        <MudIconButton Icon="@Icons.Material.Outlined.Delete" Class="ml-4" OnClick="DeleteDetails" />
+        <MudIconButton Icon="@Icons.Material.Outlined.Add" Color="Color.Primary" Variant="Variant.Filled" OnClick="AddDetail" />
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>Food</MudTh>
+        <MudTh>Price</MudTh>
+        <MudTh>Qty</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Food">@context.FoodItem.Name</MudTd>
+        <MudTd DataLabel="Price">@context.Price</MudTd>
+        <MudTd DataLabel="Qty">@context.Qty</MudTd>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager />
+    </PagerContent>
+</MudTable>
+
+@code {
+    public CultureInfo _de = CultureInfo.GetCultureInfo("de-DE");
+    public CultureInfo _en = CultureInfo.GetCultureInfo("en-US");
+
+    CreateOrderRequest model = new CreateOrderRequest();
+    IEnumerable<DiningTableResponse> diningTables = new List<DiningTableResponse>();
+    IEnumerable<OrderStatusResponse> orderStatuses = new List<OrderStatusResponse>();
+    IEnumerable<FoodItemResponse> foodItems = new List<FoodItemResponse>();
+    const decimal _tax = 3;
+
+    private string searchDetail = "";
+    private MudTable<OrderDetailRequest> _table;
+    private HashSet<OrderDetailRequest> selectedItems = new HashSet<OrderDetailRequest>();
+
+    protected override async void OnInitialized()
+    {
+        diningTables = await diningTableRepository.GetAllAsync();
+        orderStatuses = await orderStatusRepository.GetAllAsync();
+        foodItems = await foodItemRepository.GetAllAsync();
+
+        var orderStatusRequested = orderStatuses.Where(e => e.Code == OrderStatusCode.Requested.ToString()).First();
+        model.OrderStatusId = orderStatusRequested.Id.ToString();
+        model.Tax = _tax;
+
+        StateHasChanged();
+    }
+
+    private bool FilterFunc1(OrderDetailRequest element) => FilterFunc(element, searchDetail);
+
+    private bool FilterFunc(OrderDetailRequest element, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (element.FoodItem.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
+
+    private async void AddDetail()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+        var dialogReference = await dialogService.ShowAsync<AddOrderDetailDialog>("Add Food Dialog", options);
+        var dialogResult = await dialogReference.Result;
+
+        if (!dialogResult.Canceled)
+        {
+            model.OrderDetails.Add((OrderDetailRequest)dialogResult.Data!);
+            model.TotalPrice = model.OrderDetails.Sum(e => e.Price * e.Qty);
+            model.BillAmount = model.TotalPrice + model.Tax / 100 * model.TotalPrice;
+
+            StateHasChanged();
+        }
+    }
+
+    private void DeleteDetails()
+    {
+        
+    }
+
+    private async void Add()
+    {
+        try
+        {
+            await orderRepository.CreateAsync(model);
+            snackbar.Add("Successfully add new order.", Severity.Success);
+            GoBack();
+        }
+        catch (Exception ex)
+        {
+            snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+
+    private void GoBack()
+    {
+        navigationManager.NavigateTo(Routes.Order);
+    }
+}

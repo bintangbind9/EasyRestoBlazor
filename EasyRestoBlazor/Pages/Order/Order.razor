@@ -1,0 +1,131 @@
+﻿@page "/order"
+
+@inject HttpClient httpClient
+@inject IBaseRepository<CreateOrderRequest, UpdateOrderRequest, OrderResponse> orderRepository
+@inject NavigationManager navigationManager
+@inject ISnackbar snackbar
+@inject IDialogService DialogService
+
+<PageTitle>Order</PageTitle>
+
+<MudTable @ref="_table" T="OrderResponse" Items="@Elements" Dense="@dense" Hover="@hover" Bordered="false" Striped="false"
+          Filter="new Func<OrderResponse,bool>(FilterFunc1)" @bind-SelectedItems="selectedItems" MultiSelection="true" SelectionChangeable="true" OnRowClick="OnRowClick" SelectOnRowClick="false">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Orders</MudText>
+        <MudSpacer />
+        <MudTextField @bind-Value="searchString" Placeholder="Search Code" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        <MudIconButton Icon="@Icons.Material.Outlined.Delete" Class="ml-4" OnClick="DeleteItems" />
+        <MudIconButton Icon="@Icons.Material.Outlined.Add" OnClick="GoToAddPage" />
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>Code</MudTh>
+        <MudTh>Table</MudTh>
+        <MudTh>Date</MudTh>
+        <MudTh>Waiter</MudTh>
+        <MudTh>Chef</MudTh>
+        <MudTh>Total Price</MudTh>
+        <MudTh>Tax</MudTh>
+        <MudTh>Bill Amount</MudTh>
+        <MudTh>Status</MudTh>
+        <MudTh>Customer Note</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Code">@context.Code</MudTd>
+        <MudTd DataLabel="Table">@context.DiningTable.Name</MudTd>
+        <MudTd DataLabel="Date">@context.Date.ToString("d MMM yyyy HH:mm:ss")</MudTd>
+        <MudTd DataLabel="Waiter">@context.Waiter.Name</MudTd>
+        <MudTd DataLabel="Chef">@context.Chef?.Name</MudTd>
+        <MudTd DataLabel="Total Price">@context.TotalPrice</MudTd>
+        <MudTd DataLabel="Tax">@(context.Tax * 100) %</MudTd>
+        <MudTd DataLabel="Bill Amount">@context.BillAmount</MudTd>
+        <MudTd DataLabel="Status">@context.OrderStatus.Name</MudTd>
+        <MudTd DataLabel="Customer Note">@context.CustomerNote</MudTd>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager />
+    </PagerContent>
+</MudTable>
+
+@code {
+    private bool dense = true;
+    private bool hover = true;
+    private string searchString = "";
+    private MudTable<OrderResponse> _table;
+    private HashSet<OrderResponse> selectedItems = new HashSet<OrderResponse>();
+
+    private IEnumerable<OrderResponse> Elements = new List<OrderResponse>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        LoadElements();
+    }
+
+    private async void LoadElements()
+    {
+        try
+        {
+            Elements = await orderRepository.GetAllAsync();
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+
+    private bool FilterFunc1(OrderResponse element) => FilterFunc(element, searchString);
+
+    private bool FilterFunc(OrderResponse element, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (element.Code.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
+
+    private void GoToAddPage()
+    {
+        navigationManager.NavigateTo(Routes.OrderCreate);
+    }
+
+    private void OnRowClick(TableRowClickEventArgs<OrderResponse> args)
+    {
+        /*
+        if (args.Item is not null)
+        {
+            navigationManager.NavigateTo($"{Routes.OrderUpdate}/{args.Item.Id}");
+        }
+        */
+    }
+
+    private async Task DeleteItems()
+    {
+        if (!selectedItems.Any()) return;
+
+        var parameters = new DialogParameters
+        {
+            { "Title", "Delete Item(s)" },
+            { "Message", $"Are you sure you want to delete {selectedItems.Count} item(s)?" }
+        };
+
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+        var dialog = DialogService.Show<ConfirmationDialog>("Delete Items", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            try
+            {
+                DeleteItemsRequest request = new DeleteItemsRequest { Ids = selectedItems.Select(e => e.Id).ToList() };
+                await orderRepository.DeletesAsync(request);
+                snackbar.Add("Successfully delete selected items.", Severity.Success);
+                LoadElements();
+            }
+            catch (Exception ex)
+            {
+                snackbar.Add(ex.Message, Severity.Error);
+            }
+        }
+    }
+}

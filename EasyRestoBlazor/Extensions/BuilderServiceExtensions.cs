@@ -17,6 +17,8 @@ namespace EasyRestoBlazor.Extensions
             services.AddTransient<IBaseRepository<CreatePrivilegeRequest, UpdatePrivilegeRequest, PrivilegeResponse>, PrivilegeRepository>();
             services.AddTransient<IBaseRepository<CreateFoodItemRequest, UpdateFoodItemRequest, FoodItemResponse>, FoodItemRepository>();
             services.AddTransient<IBaseRepository<CreateFoodItemStatusRequest, UpdateFoodItemStatusRequest, FoodItemStatusResponse>, FoodItemStatusRepository>();
+            services.AddTransient<IBaseRepository<CreateOrderRequest, UpdateOrderRequest, OrderResponse>, OrderRepository>();
+            services.AddTransient<IBaseRepository<CreateOrderStatusRequest, UpdateOrderStatusRequest, OrderStatusResponse>, OrderStatusRepository>();
 
             return services;
         }

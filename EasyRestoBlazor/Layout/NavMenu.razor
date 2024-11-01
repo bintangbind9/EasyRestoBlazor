@@ -1,5 +1,8 @@
 ﻿<MudNavMenu>
     <MudNavLink Href="@Routes.Dashboard" Match="NavLinkMatch.Prefix">Dashboard</MudNavLink>
+    <MudNavGroup Title="Transactions" Expanded="true">
+        <MudNavLink Href="@Routes.Order" Match="NavLinkMatch.Prefix">Order</MudNavLink>
+    </MudNavGroup>
     <MudNavGroup Title="Masters" Expanded="false">
         <MudNavLink Href="@Routes.AppUser" Match="NavLinkMatch.Prefix">App User</MudNavLink>
         <MudNavLink Href="@Routes.Role" Match="NavLinkMatch.Prefix">Role Management</MudNavLink>

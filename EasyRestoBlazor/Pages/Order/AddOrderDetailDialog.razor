@@ -1,0 +1,55 @@
+﻿@inject IBaseRepository<CreateFoodItemRequest, UpdateFoodItemRequest, FoodItemResponse> foodItemRepository
+
+<EditForm Model="@model" OnValidSubmit="Add">
+    <DataAnnotationsValidator />
+    <MudDialog>
+        <DialogContent>
+            <MudSelect Label="Food" @ref="_select" T="string" ValueChanged="OnValueChanged"
+                       Value="model.FoodItemId" For="@(() => model.FoodItemId)">
+                @foreach (var foodItem in foodItems)
+                {
+                    <MudSelectItem Value="foodItem.Id.ToString()">@foodItem.Name</MudSelectItem>
+                }
+            </MudSelect>
+            <MudNumericField Label="Price" Class="mt-3" Immediate="false" Format="N2" Culture="@_en" T="decimal" ReadOnly="true"
+                             @bind-Value="model.Price" For="@(() => model.Price)" />
+            <MudNumericField Label="Qty" Class="mt-3" Immediate="false" T="int"
+                             @bind-Value="model.Qty" For="@(() => model.Qty)" />
+        </DialogContent>
+        <DialogActions>
+            <MudButton OnClick="Cancel">Cancel</MudButton>
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Add</MudButton>
+        </DialogActions>
+    </MudDialog>
+</EditForm>
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+
+    private MudSelect<string> _select;
+
+    public CultureInfo _en = CultureInfo.GetCultureInfo("en-US");
+
+    private OrderDetailRequest model = new OrderDetailRequest { Id = Guid.NewGuid().ToString() };
+
+    IEnumerable<FoodItemResponse> foodItems = new List<FoodItemResponse>();
+
+    protected override async void OnInitialized()
+    {
+        foodItems = await foodItemRepository.GetAllAsync();
+    }
+
+    private void OnValueChanged(string value)
+    {
+        var foodItem = foodItems.Where(e => e.Id.ToString() == value).First();
+        model.FoodItemId = value;
+        model.FoodItem = foodItem;
+        model.Price = foodItem.Price;
+        StateHasChanged();
+    }
+
+    private void Add() => MudDialog.Close(DialogResult.Ok(model));
+
+    private void Cancel() => MudDialog.Cancel();
+}

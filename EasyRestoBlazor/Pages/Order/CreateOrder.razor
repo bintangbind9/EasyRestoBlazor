@@ -35,24 +35,24 @@
             </MudSelect>
             <MudNumericField Label="Total Price" Class="mt-3" Immediate="false" Format="N2" Culture="@_en" T="decimal" ReadOnly="true"
                              @bind-Value="model.TotalPrice" For="@(() => model.TotalPrice)" />
-            <MudNumericField Label="Tax (%)" Class="mt-3" Immediate="false" Format="N2" Culture="@_en" T="decimal"
-                             @bind-Value="model.Tax" For="@(() => model.Tax)" />
+            <MudNumericField Label="Tax (%)" Class="mt-3" Immediate="false" Format="N2" Culture="@_en" T="decimal" ValueChanged="OnTaxChanged"
+                             Value="model.Tax" For="@(() => model.Tax)" />
             <MudNumericField Label="Bill Amount" Class="mt-3" Immediate="false" Format="N2" Culture="@_en" T="decimal" ReadOnly="true"
                              @bind-Value="model.BillAmount" For="@(() => model.BillAmount)" />
-            <MudTextField Label="Customer Note" Class="mt-3" Lines="3"
+            <MudTextField Label="Customer Note" Class="mt-3" Lines="3" Variant="Variant.Outlined"
                           @bind-Value="model.CustomerNote" For="@(() => model.CustomerNote)" />
         </MudCardContent>
     </MudCard>
 </EditForm>
 
 <MudTable @ref="_table" T="OrderDetailRequest" Items="@model.OrderDetails" Dense="true" Hover="true" Bordered="false" Striped="false" Class="mt-4 mb-4"
-          Filter="new Func<OrderDetailRequest,bool>(FilterFunc1)" @bind-SelectedItems="selectedItems" MultiSelection="true" SelectionChangeable="true" SelectOnRowClick="true">
+          Filter="new Func<OrderDetailRequest,bool>(FilterFunc1)" @bind-SelectedItems="selectedItems" MultiSelection="false" SelectionChangeable="false" SelectOnRowClick="false">
     <ToolBarContent>
         <MudText Typo="Typo.h6">Selected Foods</MudText>
         <MudSpacer />
         <MudTextField @bind-Value="searchDetail" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
-        <MudIconButton Icon="@Icons.Material.Outlined.Delete" Class="ml-4" OnClick="DeleteDetails" />
-        <MudIconButton Icon="@Icons.Material.Outlined.Add" Color="Color.Primary" Variant="Variant.Filled" OnClick="AddDetail" />
+        <MudIconButton Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" Class="ml-4" OnClick="DeleteDetails" />
+        <MudIconButton Icon="@Icons.Material.Outlined.Add" Color="Color.Primary" Variant="Variant.Text" OnClick="AddDetail" />
     </ToolBarContent>
     <HeaderContent>
         <MudTh>Food</MudTh>
@@ -62,7 +62,11 @@
     <RowTemplate>
         <MudTd DataLabel="Food">@context.FoodItem.Name</MudTd>
         <MudTd DataLabel="Price">@context.Price</MudTd>
-        <MudTd DataLabel="Qty">@context.Qty</MudTd>
+        <MudTd DataLabel="Qty">
+            <MudIconButton Icon="@Icons.Material.Outlined.HorizontalRule" OnClick="(e => SubstractOne(context.Id))"></MudIconButton>
+            @context.Qty
+            <MudIconButton Icon="@Icons.Material.Outlined.Add" OnClick="(e => AddByOne(context.Id))"></MudIconButton>
+        </MudTd>
     </RowTemplate>
     <PagerContent>
         <MudTablePager />
@@ -77,7 +81,7 @@
     IEnumerable<DiningTableResponse> diningTables = new List<DiningTableResponse>();
     IEnumerable<OrderStatusResponse> orderStatuses = new List<OrderStatusResponse>();
     IEnumerable<FoodItemResponse> foodItems = new List<FoodItemResponse>();
-    const decimal _tax = 3;
+    const decimal _tax = 10;
 
     private string searchDetail = "";
     private MudTable<OrderDetailRequest> _table;
@@ -107,6 +111,21 @@
         return false;
     }
 
+    private void Calculate()
+    {
+        model.TotalPrice = model.OrderDetails.Sum(e => e.Price * e.Qty);
+        model.BillAmount = model.TotalPrice + model.Tax / 100 * model.TotalPrice;
+        StateHasChanged();
+    }
+
+    private void OnTaxChanged(decimal value)
+    {
+        model.Tax = value;
+        StateHasChanged();
+
+        Calculate();
+    }
+
     private async void AddDetail()
     {
         var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small, FullWidth = true };
@@ -115,23 +134,79 @@
 
         if (!dialogResult.Canceled)
         {
-            model.OrderDetails.Add((OrderDetailRequest)dialogResult.Data!);
-            model.TotalPrice = model.OrderDetails.Sum(e => e.Price * e.Qty);
-            model.BillAmount = model.TotalPrice + model.Tax / 100 * model.TotalPrice;
+            var newOrderDetail = (OrderDetailRequest)dialogResult.Data!;
+            var orderDetail = model.OrderDetails.Where(e => e.FoodItemId == newOrderDetail.FoodItemId).FirstOrDefault();
+            if (orderDetail is not null)
+            {
+                orderDetail.Qty += newOrderDetail.Qty;
+            }
+            else
+            {
+                model.OrderDetails.Add(newOrderDetail);
+            }
 
             StateHasChanged();
+
+            Calculate();
         }
     }
 
-    private void DeleteDetails()
+    private void AddByOne(string id)
     {
-        
+        var orderDetail = model.OrderDetails.Where(e => e.Id == id).Single();
+        orderDetail.Qty += 1;
+        StateHasChanged();
+        Calculate();
+    }
+
+    private void SubstractOne(string id)
+    {
+        var orderDetail = model.OrderDetails.Where(e => e.Id == id).Single();
+        if (orderDetail.Qty <= 1)
+        {
+            model.OrderDetails.Remove(orderDetail);
+        }
+        else
+        {
+            orderDetail.Qty -= 1;
+        }
+        StateHasChanged();
+        Calculate();
+    }
+
+    private async Task DeleteDetails()
+    {
+        if (!model.OrderDetails.Any()) return;
+
+        var parameters = new DialogParameters
+        {
+            { "Title", "Clear Item(s)" },
+            { "Message", $"Are you sure you want to clear item(s)?" }
+        };
+
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+        var dialog = dialogService.Show<ConfirmationDialog>("Clear Items", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            model.OrderDetails.Clear();
+            StateHasChanged();
+
+            Calculate();
+        }
     }
 
     private async void Add()
     {
         try
         {
+            if (!model.OrderDetails.Any())
+            {
+                snackbar.Add("Please choose food.", Severity.Info);
+                return;
+            }
+
             await orderRepository.CreateAsync(model);
             snackbar.Add("Successfully add new order.", Severity.Success);
             GoBack();

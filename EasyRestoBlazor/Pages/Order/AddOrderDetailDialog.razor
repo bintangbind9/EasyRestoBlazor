@@ -17,7 +17,8 @@
                              @bind-Value="model.Qty" For="@(() => model.Qty)" />
         </DialogContent>
         <DialogActions>
-            <MudButton OnClick="Cancel">Cancel</MudButton>
+            <MudSpacer />
+            <MudButton OnClick="Cancel" Class="mr-2">Cancel</MudButton>
             <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Add</MudButton>
         </DialogActions>
     </MudDialog>

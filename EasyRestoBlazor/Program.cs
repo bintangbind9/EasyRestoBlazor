@@ -14,9 +14,9 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 builder.Services.AddBlazoredSessionStorage();
 builder.Services.AddMudServices(config =>
 {
-    config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.TopRight;
+    config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomLeft;
     config.SnackbarConfiguration.PreventDuplicates = false;
-    config.SnackbarConfiguration.NewestOnTop = true;
+    config.SnackbarConfiguration.NewestOnTop = false;
 });
 
 builder.Services.AddScoped<HttpClient>(sp =>

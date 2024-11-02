@@ -38,7 +38,7 @@
 
     protected override async void OnInitialized()
     {
-        foodItems = await foodItemRepository.GetAllAsync();
+        foodItems = (await foodItemRepository.GetAllAsync()).Where(e => e.FoodItemStatus.Code == FoodStatusCode.Ready.ToString());
     }
 
     private void OnValueChanged(string value)

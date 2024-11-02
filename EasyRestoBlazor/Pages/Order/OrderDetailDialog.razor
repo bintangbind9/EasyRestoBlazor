@@ -1,0 +1,41 @@
+﻿<MudDialog>
+    <TitleContent>@Title</TitleContent>
+    <DialogContent>
+        <MudTable @ref="_table" T="OrderDetailResponse" Items="@Order.OrderDetails" Dense="true" Hover="true" Bordered="false" Striped="false" Class="mb-4">
+            <ToolBarContent>
+                <MudText>Foods</MudText>
+            </ToolBarContent>
+            <HeaderContent>
+                <MudTh>Name</MudTh>
+                <MudTh>Price</MudTh>
+                <MudTh>Qty</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Name">@context.FoodItem.Name</MudTd>
+                <MudTd DataLabel="Price">@context.Price</MudTd>
+                <MudTd DataLabel="Qty">@context.Qty</MudTd>
+            </RowTemplate>
+            <FooterContent>
+                <MudTd><b>Total</b></MudTd>
+                <MudTd colspan="2"><b>@Order.TotalPrice</b></MudTd>
+            </FooterContent>
+        </MudTable>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Confirm" Variant="Variant.Filled" Color="Color.Primary">Close</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance Dialog { get; set; }
+
+    [Parameter] public string Title { get; set; } = "Order No.";
+    [Parameter] public OrderResponse Order { get; set; }
+
+    private MudTable<OrderDetailResponse> _table;
+
+    void Confirm()
+    {
+        Dialog.Close(DialogResult.Ok(true));
+    }
+}

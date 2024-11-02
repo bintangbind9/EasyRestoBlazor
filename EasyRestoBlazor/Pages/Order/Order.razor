@@ -91,12 +91,18 @@
 
     private void OnRowClick(TableRowClickEventArgs<OrderResponse> args)
     {
-        /*
         if (args.Item is not null)
         {
-            navigationManager.NavigateTo($"{Routes.OrderUpdate}/{args.Item.Id}");
+            /* navigationManager.NavigateTo($"{Routes.OrderUpdate}/{args.Item.Id}"); */
+            var parameters = new DialogParameters
+            {
+                { "Title", $"Order No. {args.Item.Code}" },
+                { "Order", args.Item }
+            };
+
+            var options = new DialogOptions { CloseOnEscapeKey = true };
+            var dialog = DialogService.Show<OrderDetailDialog>("Order Detail", parameters, options);
         }
-        */
     }
 
     private async Task DeleteItems()

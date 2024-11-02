@@ -94,5 +94,18 @@ namespace EasyRestoBlazor.Infrastructure.Repository
                 throw new Exception(baseResponse.Errors.Any() ? baseResponse.Errors[0] : $"Failed Update {_objName}!");
             }
         }
+
+        public async Task UpdateAsync(UpdateOrderOrderStatusRequest obj)
+        {
+            var jsonContent = JsonContent.Create(obj);
+            var response = await _http.PostAsync($"{_url}/UpdateOrderStatus", jsonContent);
+
+            var baseResponse = await response.Content.ReadFromJsonAsync<BaseResponse<string>>();
+
+            if (baseResponse.Status != 200)
+            {
+                throw new Exception(baseResponse.Errors.Any() ? baseResponse.Errors[0] : $"Failed Update {_objName} Status!");
+            }
+        }
     }
 }

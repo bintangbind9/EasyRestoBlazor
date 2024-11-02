@@ -28,6 +28,7 @@
         <MudTh>Bill Amount</MudTh>
         <MudTh>Status</MudTh>
         <MudTh>Customer Note</MudTh>
+        <MudTh>Actions</MudTh>
     </HeaderContent>
     <RowTemplate>
         <MudTd DataLabel="Code">@context.Code</MudTd>
@@ -40,6 +41,36 @@
         <MudTd DataLabel="Bill Amount">@context.BillAmount</MudTd>
         <MudTd DataLabel="Status">@context.OrderStatus.Name</MudTd>
         <MudTd DataLabel="Customer Note">@context.CustomerNote</MudTd>
+        <MudTd DataLabel="Actions">
+            @if (context.OrderStatus.Code == OrderStatusCode.Requested.ToString())
+            {
+                <MudButton ButtonType="ButtonType.Button" Variant="Variant.Text" StartIcon="@Icons.Material.Filled.Close" Color="Color.Error"
+                    OnClick="@(e => UpdateOrderStatus(new UpdateOrderOrderStatusRequest { Id = context.Id, StatusCode = OrderStatusCode.Canceled.ToString() }))">Cancel</MudButton>
+
+                <MudButton ButtonType="ButtonType.Button" Variant="Variant.Outlined" EndIcon="@Icons.Material.Filled.ArrowForward" Color="Color.Primary"
+                    OnClick="@(e => UpdateOrderStatus(new UpdateOrderOrderStatusRequest { Id = context.Id, StatusCode = OrderStatusCode.Cooking.ToString() }))">Cook</MudButton>
+            }
+            else if (context.OrderStatus.Code == OrderStatusCode.Cooking.ToString())
+            {
+                <MudButton ButtonType="ButtonType.Button" Variant="Variant.Outlined" EndIcon="@Icons.Material.Filled.ArrowForward" Color="Color.Primary"
+                    OnClick="@(e => UpdateOrderStatus(new UpdateOrderOrderStatusRequest { Id = context.Id, StatusCode = OrderStatusCode.Ready.ToString() }))">Finish Cooking</MudButton>
+            }
+            else if (context.OrderStatus.Code == OrderStatusCode.Ready.ToString())
+            {
+                <MudButton ButtonType="ButtonType.Button" Variant="Variant.Outlined" EndIcon="@Icons.Material.Filled.ArrowForward" Color="Color.Primary"
+                           OnClick="@(e => UpdateOrderStatus(new UpdateOrderOrderStatusRequest { Id = context.Id, StatusCode = OrderStatusCode.Delivered.ToString() }))">Delivered</MudButton>
+            }
+            else if (context.OrderStatus.Code == OrderStatusCode.Delivered.ToString())
+            {
+                <MudButton ButtonType="ButtonType.Button" Variant="Variant.Outlined" EndIcon="@Icons.Material.Filled.ArrowForward" Color="Color.Primary"
+                           OnClick="@(e => UpdateOrderStatus(new UpdateOrderOrderStatusRequest { Id = context.Id, StatusCode = OrderStatusCode.Billed.ToString() }))">Receive Payment</MudButton>
+            }
+            else if (context.OrderStatus.Code == OrderStatusCode.Billed.ToString())
+            {
+                <MudButton ButtonType="ButtonType.Button" Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.Check" Color="Color.Primary"
+                           OnClick="@(e => UpdateOrderStatus(new UpdateOrderOrderStatusRequest { Id = context.Id, StatusCode = OrderStatusCode.Closed.ToString() }))">Close</MudButton>
+            }
+        </MudTd>
     </RowTemplate>
     <PagerContent>
         <MudTablePager />
@@ -102,6 +133,21 @@
 
             var options = new DialogOptions { CloseOnEscapeKey = true };
             var dialog = DialogService.Show<OrderDetailDialog>("Order Detail", parameters, options);
+        }
+    }
+
+    private async void UpdateOrderStatus(UpdateOrderOrderStatusRequest request)
+    {
+        try
+        {
+            var repo = (OrderRepository)orderRepository;
+            await repo.UpdateAsync(request);
+            snackbar.Add("Successfully update order status.", Severity.Success);
+            LoadElements();
+        }
+        catch (Exception ex)
+        {
+            snackbar.Add(ex.Message, Severity.Error);
         }
     }
 

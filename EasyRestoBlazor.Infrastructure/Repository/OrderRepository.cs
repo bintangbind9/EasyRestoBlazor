@@ -16,6 +16,20 @@ namespace EasyRestoBlazor.Infrastructure.Repository
             _http = http;
         }
 
+        public async Task<IEnumerable<GroupOrderStatusResponse>> GetBarData()
+        {
+            var response = await _http.GetAsync($"{_url}/GetBarData");
+
+            var baseResponse = await response.Content.ReadFromJsonAsync<BaseResponse<IEnumerable<GroupOrderStatusResponse>>>();
+
+            if (baseResponse.Status != 200)
+            {
+                throw new Exception(baseResponse.Errors.Any() ? baseResponse.Errors[0] : $"Failed Get All Data!");
+            }
+
+            return baseResponse.Data;
+        }
+
         public async Task CreateAsync(CreateOrderRequest obj)
         {
             var jsonContent = JsonContent.Create(obj);

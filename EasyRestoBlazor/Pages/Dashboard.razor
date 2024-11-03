@@ -1,9 +1,57 @@
 ﻿@page "/dashboard"
 
+@inject IBaseRepository<CreateOrderRequest, UpdateOrderRequest, OrderResponse> orderRepository
+
 <PageTitle>Dashboard</PageTitle>
 
-<h1>Dashboard</h1>
+<MudCard>
+    <MudCardHeader>
+        <MudText Typo="Typo.h6">Bar Chart</MudText>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudChart ChartType="ChartType.StackedBar" ChartSeries="@Series" XAxisLabels="@XAxisLabels" Width="100%" Height="350px"></MudChart>
+    </MudCardContent>
+</MudCard>
 
 @code {
+    public List<ChartSeries> Series = new List<ChartSeries>();
+    public string[] XAxisLabels = { };
 
+    protected override async void OnInitialized()
+    {
+        var repo = (OrderRepository)orderRepository;
+        var groupOrderStatuses = await repo.GetBarData();
+        List<DateTime> last10Days = GetLastDays(10);
+
+        foreach (OrderStatusCode orderStatusCode in Enum.GetValues(typeof(OrderStatusCode)))
+        {
+            if (orderStatusCode == OrderStatusCode.Draft) continue;
+
+            var datas = new List<double>();
+
+            foreach (var date in last10Days)
+            {
+                var qry = groupOrderStatuses.Where(e => e.Date.Date == date.Date && e.OrderStatus.Code == orderStatusCode.ToString());
+                datas.Add(qry.Select(e => e.Count).SingleOrDefault());
+            }
+
+            Series.Add(new ChartSeries() { Name = orderStatusCode.ToString(), Data = datas.ToArray() });
+        }
+
+        XAxisLabels = GetLastDays(10).Select(e => e.ToString("d MMM")).ToArray();
+
+        StateHasChanged();
+    }
+
+    private List<DateTime> GetLastDays(int day)
+    {
+        List<DateTime> dates = new List<DateTime>();
+
+        for (int i = day - 1; i >= 0; i--)
+        {
+            dates.Add(DateTime.Today.AddDays(-i));
+        }
+
+        return dates;
+    }
 }
